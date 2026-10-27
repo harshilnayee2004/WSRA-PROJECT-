@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://cityfix.com/soap/issues"
+    xmlns:tns="http://cityfix.com/soap/issues"
+    elementFormDefault="qualified">
+
+    <xs:element name="GetIssueStatisticsRequest">
+        <xs:complexType/>
+    </xs:element>
+
+    <xs:element name="GetIssueStatisticsResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="totalIssues" type="xs:long"/>
+                <xs:element name="submittedIssues" type="xs:long"/>
+                <xs:element name="assignedIssues" type="xs:long"/>
+                <xs:element name="inProgressIssues" type="xs:long"/>
+                <xs:element name="resolvedIssues" type="xs:long"/>
+                <xs:element name="closedIssues" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

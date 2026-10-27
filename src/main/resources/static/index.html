@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityFix | Civic Issue Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-icon">C</div>
+        <div>
+            <h1>CityFix</h1>
+            <p>Civic Issue Reporting & Resolution</p>
+        </div>
+    </div>
+
+    <div class="server-status">
+        <span class="status-dot"></span>
+        Backend: localhost:8082
+    </div>
+</header>
+
+<div class="layout">
+    <aside class="sidebar">
+        <p class="menu-heading">MAIN MENU</p>
+        <button class="nav-button active" data-section="dashboard">Dashboard</button>
+        <button class="nav-button" data-section="citizens">Citizens</button>
+        <button class="nav-button" data-section="officer">Field Officers</button>
+        <button class="nav-button" data-section="issues">Issues</button>
+        <button class="nav-button" data-section="history">Issue History</button>
+        <button class="nav-button" data-section="soap">SOAP Statistics</button>
+
+        <div class="sidebar-note">
+            <strong>CityFix</strong>
+            <p>Report and track civic issues and field work in one place.</p>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <div id="messageBox" class="message-box hidden"></div>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page-section active-section">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">OVERVIEW</p>
+                    <h2>Dashboard</h2>
+                    <p class="muted">Manage citizens, officers, and civic issues.</p>
+                </div>
+                <button class="primary-button" id="refreshDashboard">Refresh Dashboard</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p>Total Citizens</p>
+                    <h3 id="citizenCount">—</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Field Officers</p>
+                    <h3 id="officerCount">—</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Total Issues</p>
+                    <h3 id="issueCount">—</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Resolved Issues</p>
+                    <h3 id="resolvedCount">—</h3>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Recent Issues</h3>
+                        <p class="muted">The latest issues retrieved from the backend.</p>
+                    </div>
+                    <button class="secondary-button" data-go="issues">Manage Issues</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody id="recentIssuesBody">
+                        <tr><td colspan="5" class="empty-state">Loading issues...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CITIZENS -->
+        <section id="citizens" class="page-section">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">USER MANAGEMENT</p>
+                    <h2>Citizens</h2>
+                    <p class="muted">Create, view, update, search, and delete citizen records.</p>
+                </div>
+                <button class="secondary-button" id="refreshCitizens">Refresh List</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 id="citizenFormTitle">Add Citizen</h3>
+                    <button class="text-button" id="cancelCitizenEdit" hidden>Cancel Edit</button>
+                </div>
+
+                <form id="citizenForm" class="form-grid">
+                    <input type="hidden" id="citizenId">
+
+                    <label>
+                        Full Name *
+                        <input type="text" id="citizenName" required>
+                    </label>
+
+                    <label>
+                        Email *
+                        <input type="email" id="citizenEmail" required>
+                    </label>
+
+                    <label>
+                        Ward
+                        <input type="text" id="citizenWard">
+                    </label>
+
+                    <label>
+                        Phone
+                        <input type="text" id="citizenPhone">
+                    </label>
+
+                    <div class="form-actions full-width">
+                        <button type="submit" class="primary-button" id="citizenSubmitButton">Add Citizen</button>
+                        <button type="reset" class="secondary-button">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Citizen Records</h3>
+                        <p class="muted">Use the ID field to retrieve an individual citizen.</p>
+                    </div>
+                </div>
+
+                <form id="citizenSearchForm" class="search-row">
+                    <input type="number" id="citizenSearchId" min="1" placeholder="Enter citizen ID">
+                    <button class="primary-button" type="submit">Find by ID</button>
+                    <button class="secondary-button" type="button" id="showAllCitizens">Show All</button>
+                </form>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Ward</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="citizensBody">
+                        <tr><td colspan="6" class="empty-state">Loading citizens...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- OFFICER -->
+        <section id="officer" class="page-section">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">TEAM MANAGEMENT</p>
+                    <h2>Field Officers</h2>
+                    <p class="muted">Manage officer details and departments.</p>
+                </div>
+                <button class="secondary-button" id="refreshOfficer">Refresh List</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 id="officerFormTitle">Add Field Officer</h3>
+                    <button class="text-button" id="cancelOfficerEdit" hidden>Cancel Edit</button>
+                </div>
+
+                <form id="officerForm" class="form-grid">
+                    <input type="hidden" id="officerId">
+
+                    <label>
+                        Full Name *
+                        <input type="text" id="officerName" required>
+                    </label>
+
+                    <label>
+                        Email *
+                        <input type="email" id="officerEmail" required>
+                    </label>
+
+                    <label>
+                        Department
+                        <input type="text" id="officerDepartment" placeholder="Roads, Water, Sanitation...">
+                    </label>
+
+                    <label>
+                        Phone
+                        <input type="text" id="officerPhone">
+                    </label>
+
+                    <div class="form-actions full-width">
+                        <button type="submit" class="primary-button" id="officerSubmitButton">Add Officer</button>
+                        <button type="reset" class="secondary-button">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3>Field Officer Records</h3>
+                </div>
+
+                <form id="officerSearchForm" class="search-row">
+                    <input type="number" id="officerSearchId" min="1" placeholder="Enter officer ID">
+                    <button class="primary-button" type="submit">Find by ID</button>
+                    <button class="secondary-button" type="button" id="showAllOfficer">Show All</button>
+                </form>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="officerBody">
+                        <tr><td colspan="6" class="empty-state">Loading officer...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ISSUES -->
+        <section id="issues" class="page-section">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">CIVIC SERVICES</p>
+                    <h2>Issues</h2>
+                    <p class="muted">Submit issues and manage their assignment and status.</p>
+                </div>
+                <button class="secondary-button" id="refreshIssues">Refresh List</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 id="issueFormTitle">Submit Issue</h3>
+                    <button class="text-button" id="cancelIssueEdit" hidden>Cancel Edit</button>
+                </div>
+
+                <form id="issueForm" class="form-grid">
+                    <input type="hidden" id="issueId">
+
+                    <label>
+                        Citizen ID *
+                        <input type="number" id="issueCitizenId" min="1" required>
+                    </label>
+
+                    <label>
+                        Issue Title *
+                        <input type="text" id="issueTitle" required>
+                    </label>
+
+                    <label>
+                        Category *
+                        <select id="issueCategory" required>
+                            <option value="">Select category</option>
+                            <option value="ROADS">Roads & Potholes</option>
+                            <option value="WATER">Water Supply</option>
+                            <option value="SANITATION">Sanitation</option>
+                            <option value="STREETLIGHT">Streetlights</option>
+                            <option value="DRAINAGE">Drainage</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Location *
+                        <input type="text" id="issueLocation" required placeholder="e.g. Ward 5, MG Road">
+                    </label>
+
+                    <label>
+                        Priority
+                        <select id="issuePriority">
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="HIGH">High</option>
+                            <option value="URGENT">Urgent</option>
+                        </select>
+                    </label>
+
+                    <label class="full-width">
+                        Description *
+                        <textarea id="issueDescription" rows="4" required></textarea>
+                    </label>
+
+                    <div class="form-actions full-width">
+                        <button type="submit" class="primary-button" id="issueSubmitButton">Submit Issue</button>
+                        <button type="reset" class="secondary-button">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Issue Records</h3>
+                        <p class="muted">Search by ID or filter by status/category.</p>
+                    </div>
+                </div>
+
+                <form id="issueSearchForm" class="search-row">
+                    <input type="number" id="issueSearchId" min="1" placeholder="Enter issue ID">
+                    <button class="primary-button" type="submit">Find by ID</button>
+                    <button class="secondary-button" type="button" id="showAllIssues">Show All</button>
+                </form>
+
+                <div class="filter-row">
+                    <label>
+                        Filter by Status
+                        <select id="statusFilter">
+                            <option value="">All statuses</option>
+                            <option value="SUBMITTED">Submitted</option>
+                            <option value="ASSIGNED">Assigned</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="RESOLVED">Resolved</option>
+                            <option value="CLOSED">Closed</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Filter by Category
+                        <select id="categoryFilter">
+                            <option value="">All categories</option>
+                            <option value="ROADS">Roads & Potholes</option>
+                            <option value="WATER">Water Supply</option>
+                            <option value="SANITATION">Sanitation</option>
+                            <option value="STREETLIGHT">Streetlights</option>
+                            <option value="DRAINAGE">Drainage</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </label>
+
+                    <button type="button" class="secondary-button" id="applyIssueFilters">Apply Filters</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Citizen ID</th>
+                            <th>Category</th>
+                            <th>Location</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Officer ID</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="issuesBody">
+                        <tr><td colspan="9" class="empty-state">Loading issues...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Issue Actions</h3>
+                        <p class="muted">Assign an officer or change the status of an issue.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <label>
+                        Issue ID *
+                        <input type="number" id="actionIssueId" min="1" required>
+                    </label>
+
+                    <label>
+                        Assign to Officer ID *
+                        <input type="number" id="assignOfficerId" min="1">
+                    </label>
+
+                    <div class="form-actions">
+                        <button type="button" class="primary-button" id="assignOfficerButton">Assign Officer</button>
+                    </div>
+
+                    <label>
+                        New Status *
+                        <select id="newIssueStatus">
+                            <option value="SUBMITTED">Submitted</option>
+                            <option value="ASSIGNED">Assigned</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="RESOLVED">Resolved</option>
+                            <option value="CLOSED">Closed</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Remarks
+                        <input type="text" id="statusRemarks" placeholder="Add status-change remarks">
+                    </label>
+
+                    <div class="form-actions">
+                        <button type="button" class="primary-button" id="updateIssueStatusButton">Update Status</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ISSUE HISTORY -->
+        <section id="history" class="page-section">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">AUDIT TRAIL</p>
+                    <h2>Issue History</h2>
+                    <p class="muted">View recorded status changes for an issue.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <form id="historyForm" class="search-row">
+                    <input type="number" id="historyIssueId" min="1" required placeholder="Enter issue ID">
+                    <button class="primary-button" type="submit">Load History</button>
+                </form>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>History ID</th>
+                            <th>Issue ID</th>
+                            <th>Old Status</th>
+                            <th>New Status</th>
+                            <th>Remarks</th>
+                            <th>Changed At</th>
+                        </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                        <tr><td colspan="6" class="empty-state">Enter an issue ID to view its history.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOAP -->
+        <section id="soap" class="page-section">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">SOAP WEB SERVICE</p>
+                    <h2>Issue Statistics</h2>
+                    <p class="muted">Retrieve issue counts through the SOAP service.</p>
+                </div>
+                <button class="primary-button" id="loadSoapStats">Load SOAP Statistics</button>
+            </div>
+
+            <div class="panel">
+                <h3>SOAP Service Information</h3>
+                <p><strong>Endpoint:</strong> <code>/ws</code></p>
+                <p><strong>WSDL:</strong> <code>/ws/issueService.wsdl</code></p>
+                <p class="muted">
+                    This section requires the SOAP servlet, endpoint, and WSDL configuration to be working.
+                </p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><p>Total Issues (SOAP)</p><h3 id="soapTotal">—</h3></div>
+                <div class="stat-card"><p>Submitted</p><h3 id="soapSubmitted">—</h3></div>
+                <div class="stat-card"><p>Assigned</p><h3 id="soapAssigned">—</h3></div>
+                <div class="stat-card"><p>In Progress</p><h3 id="soapInProgress">—</h3></div>
+                <div class="stat-card"><p>Resolved</p><h3 id="soapResolved">—</h3></div>
+                <div class="stat-card"><p>Closed</p><h3 id="soapClosed">—</h3></div>
+            </div>
+
+            <div class="panel">
+                <h3>SOAP Response</h3>
+                <pre id="soapResponse" class="soap-response">Click "Load SOAP Statistics" to call the SOAP endpoint.</pre>
+            </div>
+        </section>
+
+        <footer>
+            CityFix &copy; 2026 | Spring Boot REST API + SOAP + MySQL
+        </footer>
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
